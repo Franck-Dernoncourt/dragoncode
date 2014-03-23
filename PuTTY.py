@@ -2,6 +2,19 @@ from dragonfly import (Grammar, AppContext, MappingRule, Dictation,
                        Key, Text, Function, Integer, IntegerRef,
                        Literal, Repeat)
 
+def capitalizeFirst(w):
+    return w[0].upper()+w[1:]
+
+
+def removeAnnotations(word):
+    i = 0
+    w = ""
+    while i < len(word):
+        if word[i] == '\\': return w
+        w = w+word[i]
+        i+= 1
+    return w
+
 
 def camel_case_text(text):
     newText = _camelify(text.words)
@@ -10,23 +23,30 @@ def camel_case_text(text):
 def _camelify(words):
     newText = ''
     for word in words:
-        if newText == '':
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
             newText = word[:1].lower() + word[1:]
         else:
-            newText = '%s%s' % (newText, word.capitalize())
+            newText = '%s%s' % (newText, capitalizeFirst(word))
     return newText
 
 def yell_text(text):
     words = text.words
     newText = ''
     for word in words:
-        newText = '%s%s' % (newText, word.upper())
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+    else:
+            newText = '%s%s' % (newText, word.upper())
     Text(newText).execute()
 
 def lisp_text(text):
     newText = ''
     for word in text.words:
-        if newText == '':
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
             newText = word.lower()
         else:
             newText = '%s-%s' % (newText, word.lower())
@@ -35,7 +55,9 @@ def lisp_text(text):
 def dot_case_text(text):
     newText = ''
     for word in text.words:
-        if newText == '':
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
             newText = word.lower()
         else:
             newText = '%s.%s' % (newText, word.lower())
@@ -44,10 +66,12 @@ def dot_case_text(text):
 def big_dot_case_text(text):
     newText = ''
     for word in text.words:
-        if newText == '':
-            newText = word.capitalize()
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
+            newText = capitalizeFirst(word)
         else:
-            newText = '%s.%s' % (newText, word.capitalize())
+            newText = '%s.%s' % (newText, capitalizeFirst(word))
     return Text(newText).execute()
 
 def big_camel_case_text(text):
@@ -57,10 +81,12 @@ def big_camel_case_text(text):
 def _bigcamelify(words):
     newText = ''
     for word in words:
-        if newText == '':
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
             newText = word[:1].capitalize() + word[1:]
         else:
-            newText = '%s%s' % (newText, word.capitalize())
+            newText = '%s%s' % (newText, capitalizeFirst(word))
     return newText
 
 def rich_case_text(text):
@@ -70,7 +96,9 @@ def rich_case_text(text):
 def _richify(words):
     newText = ''
     for word in words:
-        if newText == '':
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
             newText = word[:1] + word[1:]
         else:
             newText = '%s_%s' % (newText, word)
@@ -100,34 +128,37 @@ gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar]
 example_rule = MappingRule(
     name="example",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
+        "butterfly": Key("a-x"),
+        "stop job": Key("c-z"),
+        "foreground": Text("fg "),
              "save":            Key("c-x, c-s"),
-	     "open":            Key("c-x, c-f"),
+             "open":            Key("c-x, c-f"),
              "apostate": Key("c-x/10, c-c/10"),
              "mac start":            Key("c-x, lparen"),
-	     "mac end":            Key("c-x, rparen"),
-	     "mac do":            Key("c-x, e"),
+             "mac end":            Key("c-x, rparen"),
+             "mac do":            Key("c-x, e"),
              "sun":             Key("c-s"),
              "run":             Key("c-r"),
              "rancor":          Key("as-5"),
              "amp": Key("ampersand"),
              "wink": Text(";"),
              "mango <n>":           Key("a-g, g")+Text("%(n)d")+Key("enter"),
-	     "circle":             Key("lparen, rparen, left"),
-	     "box":             Key("lbracket, rbracket, left"),
-	     "diamond":             Key("langle, rangle, left"),
-	     "curl":             Key("lbrace, rbrace, left"),
+             "circle":             Key("lparen, rparen, left"),
+             "box":             Key("lbracket, rbracket, left"),
+             "diamond":             Key("langle, rangle, left"),
+             "curl":             Key("lbrace, rbrace, left"),
              "string": Text("\"\"") + Key("left"),
              "rabbit": Text("''") + Key("left"),
-	     "hop":             Key("c-x, o"),
-	     "bash":		Key("a-x, s, h, e, l, l, enter"),
-	     "quit":		Key("c-g"),
-	     "veal":		Key("c-x, 3"),
-	     "holly":		Key("c-x, 2"),
-	     "breathe":		Key("c-x, 1"),
+             "hop":             Key("c-x, o"),
+    "bash":Key("a-x, s, h, e, l, l, enter"),
+    "quit":Key("c-g"),
+    "veal":Key("c-x, 3"),
+    "holly":Key("c-x, 2"),
+    "breathe":Key("c-x, 1"),
              "underscore": Text("_"),
-	     "buff":		Key("c-x, c-b"),
+    "buff":Key("c-x, c-b"),
              "leap [<n>]":            Key("ca-f")*Repeat(extra="n"),
-             "reap [<n>]":         Key("ca-b")*Repeat(extra="n"),
+             "trip [<n>]":         Key("ca-b")*Repeat(extra="n"),
              "paste":         Key("c-y"),
              "scratch":         Key("c-x, u"),
              "scratch that":         Key("c-x, u"),
@@ -152,8 +183,9 @@ example_rule = MappingRule(
              "colon":        Key("colon"),
              "reach":        Key("c-e"),
              "fall":          Key("c-a"),
-"sword [<n>]": Key('delete')*Repeat(extra = "n"),
+"sword [<n>]": Key('c-d')*Repeat(extra = "n"),
 "pike [<n>]": Key('backspace')*Repeat(extra = "n"),
+             "pounce [<n>]":        Key("a-p") * Repeat(extra="n"),
              "up [<n>]":        Key("up") * Repeat(extra="n"),
              "down [<n>]":          Key("down") * Repeat(extra="n"),
              "left [<n>]":        Key("left") * Repeat(extra="n"),
@@ -225,6 +257,7 @@ example_rule = MappingRule(
 haskell_rules = MappingRule(
     name="haskell",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
+"dagger": Text("DAG"),
              "data <text>":            Text("data ")+Function(big_camel_case_text)+Text(" = "),
              "lexical":            Text("let x = x")+Key("enter, i, n, space, tab, up, c-e, backspace, left, left, left, backspace"),
              "type <text>":            Text("type ")+Function(big_camel_case_text)+Text(" = "),
@@ -233,6 +266,7 @@ haskell_rules = MappingRule(
              "do":            Text("do "),
              "where":            Text("where  = ")+Key("left, left, left"),
              "assign":            Text(" <- "),
+             "infix": Text("``")+Key("left"),
              "goes to":            Text(" -> "),
              "has type":            Text(" :: "),
              "not equal":            Text(" /= "),
@@ -265,6 +299,13 @@ haskell_rules = MappingRule(
 latex_rules = MappingRule(
     name="latex",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
+"summation": Text("\\sum"),
+"infinity": Text("\\infty"),
+"supremum": Text("\\sup "),
+"infinum": Text("\\inf "),
+"member": Text("\\in "),
+"for all": Text("\\forall "),
+"there exists": Text("\\exists"),
 "power": Text("^{}")+Key("left"),
 "compile": Key("c-c, c-c"),
 "subsection": Text("\\subsection{}")+Key("left"),
@@ -275,12 +316,16 @@ latex_rules = MappingRule(
 "refer": Text("\\ref{}")+Key("left"),
 "package": Text("\\usepackage{}")+Key("left"),
 "preamble": Text("\\documentclass{article}\n\n\n\\begin{document}\n\n\n\\end{document}")+Key("up, up"),
+"degree": Text("\\circ "),
 "section": Text("\\section{}")+Key("left"),
 "figure": Text("\\begin{figure}\n\\end{figure}")+Key("up, c-e, enter"),
 "code box": Text("\\begin{codebox}\n\\end{codebox}")+Key("up, c-e, enter"),
 "text box": Text("\\text{}")+Key("left"),
 "square root": Text("\\sqrt{}")+Key("left"),
 "dack dash": Text("\\\\"),
+"fraction": Text("\\frac{}{}")+Key("left")+Key("left")+Key("left"),
+"itemize": Text("\\begin{itemize}\n\n\\end{itemize}")+Key("up"),
+"if and only if": Text(" iff "),
 #Greek letters
 "alpha": Text("\\alpha"),
 "beta": Text("\\beta"),
@@ -351,15 +396,12 @@ alpha_rule = MappingRule(
 "mike": Key('m'), "cap mike": Key('s-m'),
 "noy": Key('n'), "cap noy": Key('s-n'),
 "osh": Key('o'), "cap osh": Key('s-o'),
-"pui": Key('p'), "cap pui": Key('s-p'),
 "pom": Key('p'), "cap pom": Key('s-p'),
-"quebec": Key('q'), "cap quebec": Key('s-q'),
 "queen": Key('q'), "cap queen": Key('s-q'),
 "ree": Key('r'), "cap ree": Key('s-r'),
 "soi": Key('s'), "cap soi": Key('s-s'),
 "tay": Key('t'), "cap tay": Key('s-t'),
 "uni": Key('u'), "cap uni": Key('s-u'),
-"umm": Key('u'), "cap umm": Key('s-u'),
 "van": Key('v'), "cap van": Key('s-v'),
 "wes": Key('w'), "cap wes": Key('s-w'),
 "xanth": Key('x'), "cap xanth": Key('s-x'),
