@@ -37,7 +37,7 @@ def yell_text(text):
     for word in words:
         word = removeAnnotations(word)
         if len(word)  < 1: pass
-    else:
+        else:
             newText = '%s%s' % (newText, word.upper())
     Text(newText).execute()
 
@@ -104,14 +104,15 @@ def _richify(words):
             newText = '%s_%s' % (newText, word)
     return newText
 
-grammar_context = AppContext(executable="emacs") | AppContext(executable="VMware") | AppContext(executable="VirtualBox") | AppContext(executable="PuTTY")
+grammar_context = AppContext(executable="emacs") | AppContext(executable="VMware") | AppContext(executable="VirtualBox") | AppContext(executable="PuTTY") | AppContext(executable="MATLAB") | AppContext(executable="Editor") | AppContext(executable="Xming") | AppContext(executable="emacs@grok")
 
 grammar = Grammar("emacs", context=grammar_context)
 haskell_grammar = Grammar("haskell", context=grammar_context)
+camel_grammar = Grammar("camel", context=grammar_context)
 latex_grammar = Grammar("latex", context=grammar_context)
 exec_grammar = Grammar("exec", context=grammar_context)
 
-gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar]
+gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar, camel_grammar]
 
 #---------------------------------------------------------------------------
 # Create a mapping rule which maps things you can say to actions.
@@ -130,7 +131,7 @@ example_rule = MappingRule(
     mapping={          # The mapping dict: spec -> action.
         "butterfly": Key("a-x"),
         "stop job": Key("c-z"),
-        "foreground": Text("fg "),
+        "foreground <n>": Text("fg ")+Text("%(n)d")+Key("enter"),
              "save":            Key("c-x, c-s"),
              "open":            Key("c-x, c-f"),
              "apostate": Key("c-x/10, c-c/10"),
@@ -151,6 +152,8 @@ example_rule = MappingRule(
              "rabbit": Text("''") + Key("left"),
              "hop":             Key("c-x, o"),
     "bash":Key("a-x, s, h, e, l, l, enter"),
+        "feline [<n>]": Key("c-x, right")*Repeat(extra = "n"),
+        "canine [<n>]": Key("c-x, left")*Repeat(extra = "n"),
     "quit":Key("c-g"),
     "veal":Key("c-x, 3"),
     "holly":Key("c-x, 2"),
@@ -183,6 +186,7 @@ example_rule = MappingRule(
              "colon":        Key("colon"),
              "reach":        Key("c-e"),
              "fall":          Key("c-a"),
+             "eat oh eff": Key("c-d"),
 "sword [<n>]": Key('c-d')*Repeat(extra = "n"),
 "pike [<n>]": Key('backspace')*Repeat(extra = "n"),
              "pounce [<n>]":        Key("a-p") * Repeat(extra="n"),
@@ -211,6 +215,7 @@ example_rule = MappingRule(
              "plus":           Key("plus"),
              "minus":          Key("minus"),
              "pipe":           Key("bar"),
+        "bang": Text("!"),
              "equals":          Key("space") + Key("equal") + Key("space"),
              "congo":          Key("space") + Key("equal") + Key("equal") + Key("space"),
              "major":          Key("space") + Key("s-dot") + Key("space"),
@@ -225,7 +230,8 @@ example_rule = MappingRule(
              "survey":          Text("ls -lah | less")+Key("enter"),
              "scout":           Text("ls")+Key("enter"),
              "doctor":           Text("dmesg|less")+Key("enter"),
-             "make":           Text("make "),
+        "airhead <n>": Key("c-x, backtick")*Repeat(extra = "n"),
+             "make <text>":           Key("a-colon")+Text("(compile \"make %(text)s\")")+Key("enter"),
              "new folder": Text("mkdir "),
              "exit": Text("exit")+Key("enter"),
              # window manager support
@@ -289,6 +295,45 @@ haskell_rules = MappingRule(
              "int": Text("Int"),
              "evaluate": Key("c-c, c-l"),
              "prime": Text("'"),
+            },
+    extras=[           # Special elements in the specs of the mapping
+            Dictation("text",format=False),
+            IntegerRef("n", 1, 2000)
+           ],
+    )
+camel_rules = MappingRule(
+    name="camel",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+             "lexical":            Text("let  =  in")+Key("left, left, left, left, left, left"),
+             "recursive": Text("let rec "),
+             "reference": Text("ref "),
+             "for loop": Key("c-c, f"),
+             "while loop": Key("c-c, w"),
+             "try": Key("c-c, i"),
+             "block": Key("c-c, b"),
+             "dunk": Text(";;")+Key("enter"),
+             "type <text>":            Text("type ")+Function(camel_case_text)+Text(" = "),
+             "lambda":            Text("fun  -> ")+Key("left, left, left, left"),
+             "match":            Text("match  with")+Key("left, left, left, left, left"),
+             "assign":            Text(" := "),
+             "goes to":            Text(" -> "),
+             "went to":            Text(" <- "),
+             "has type":            Text(" : "),
+             "not equal":            Text(" <> "),
+             "and":             Text(" && "),
+             "or":             Text(" || "),
+             "not":            Text("not "),
+             "send to": Text(" |> "),
+             "apply to": Text(" @@ "),
+             "comment":        Text("(*  *)")+Key("left, left, left"),
+             "int": Text("int"),
+             "hash table": Text("Hashtbl."),
+             "bool": Text("bool"),
+             "prime": Text("'"),
+             # Merlin commands
+             "inference": Key("c-c")+Key("c-t"),
+             "erroneous":  Key("c-c")+Key("c-x"),
+             "merlin": Key("c-c, tab"),
             },
     extras=[           # Special elements in the specs of the mapping
             Dictation("text",format=False),
@@ -369,6 +414,7 @@ executive_rules= MappingRule(
 # Add the action rule to the grammar instance.
 grammar.add_rule(example_rule)
 haskell_grammar.add_rule(haskell_rules)
+camel_grammar.add_rule(camel_rules)
 latex_grammar.add_rule(latex_rules)
 exec_grammar.add_rule(executive_rules)
 
