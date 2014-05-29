@@ -104,6 +104,21 @@ def _richify(words):
             newText = '%s_%s' % (newText, word)
     return newText
 
+def big_rich_case_text(text):
+    newText = big_richify(text.words)
+    Text(newText).execute()
+
+def big_richify(words):
+    newText = ''
+    for word in words:
+        word = removeAnnotations(word)
+        if len(word)  < 1: pass
+        elif newText == '':
+            newText = word[:1].capitalize() + word[1:]
+        else:
+            newText = '%s_%s' % (newText, word)
+    return newText
+
 grammar_context = AppContext(executable="emacs") | AppContext(executable="VMware") | AppContext(executable="VirtualBox") | AppContext(executable="PuTTY") | AppContext(executable="MATLAB") | AppContext(executable="Editor") | AppContext(executable="Xming") | AppContext(executable="emacs@grok")
 
 grammar = Grammar("emacs", context=grammar_context)
@@ -129,37 +144,40 @@ gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar, camel_grammar]
 example_rule = MappingRule(
     name="example",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
+        "Emacs": Text("emacs "),
         "butterfly": Key("a-x"),
         "stop job": Key("c-z"),
         "foreground <n>": Text("fg ")+Text("%(n)d")+Key("enter"),
              "save":            Key("c-x, c-s"),
-             "open":            Key("c-x, c-f"),
+	     "open":            Key("c-x, c-f"),
              "apostate": Key("c-x/10, c-c/10"),
+        "spin": Key("enter")+Key("tab"),
              "mac start":            Key("c-x, lparen"),
-             "mac end":            Key("c-x, rparen"),
-             "mac do":            Key("c-x, e"),
+	     "mac end":            Key("c-x, rparen"),
+	     "mac do":            Key("c-x, e"),
              "sun":             Key("c-s"),
              "run":             Key("c-r"),
              "rancor":          Key("as-5"),
              "amp": Key("ampersand"),
              "wink": Text(";"),
              "mango <n>":           Key("a-g, g")+Text("%(n)d")+Key("enter"),
-             "circle":             Key("lparen, rparen, left"),
-             "box":             Key("lbracket, rbracket, left"),
-             "diamond":             Key("langle, rangle, left"),
-             "curl":             Key("lbrace, rbrace, left"),
+	     "circle":             Key("lparen, rparen, left"),
+	     "box":             Key("lbracket, rbracket, left"),
+	     "diamond":             Key("langle, rangle, left"),
+	     "curl":             Key("lbrace, rbrace, left"),
              "string": Text("\"\"") + Key("left"),
              "rabbit": Text("''") + Key("left"),
-             "hop":             Key("c-x, o"),
-    "bash":Key("a-x, s, h, e, l, l, enter"),
+	     "hop":             Key("c-x, o"),
+	     "bash":		Key("a-x, s, h, e, l, l, enter"),
+        "no hup": Text("nohup  &")+Key("left,left"),
         "feline [<n>]": Key("c-x, right")*Repeat(extra = "n"),
         "canine [<n>]": Key("c-x, left")*Repeat(extra = "n"),
-    "quit":Key("c-g"),
-    "veal":Key("c-x, 3"),
-    "holly":Key("c-x, 2"),
-    "breathe":Key("c-x, 1"),
+	     "quit":		Key("c-g"),
+	     "veal":		Key("c-x, 3"),
+	     "holly":		Key("c-x, 2"),
+	     "breathe":		Key("c-x, 1"),
              "underscore": Text("_"),
-    "buff":Key("c-x, c-b"),
+	     "buff":		Key("c-x, c-b"),
              "leap [<n>]":            Key("ca-f")*Repeat(extra="n"),
              "trip [<n>]":         Key("ca-b")*Repeat(extra="n"),
              "paste":         Key("c-y"),
@@ -174,6 +192,7 @@ example_rule = MappingRule(
              "camel <text>": Function(camel_case_text),
              "studley <text>": Function(big_camel_case_text),
              "score <text>": Function(rich_case_text),
+        "humble <text>": Function(big_rich_case_text),
              "dote <text>": Function(dot_case_text),
              "moth <text>": Function(big_dot_case_text),
              "tab":          Key("tab"),
@@ -250,6 +269,10 @@ example_rule = MappingRule(
              "get checkout": Text("git checkout "),
              "get log": Text("git log "),
              "get clone": Text("git clone "),
+        # file extensions
+"dot em ell": Text(".ml"),
+"dot h s": Text(".hs"),
+"oh camel": Text("ocaml"),
             },
     extras=[           # Special elements in the specs of the mapping
             Dictation("text",format=False),
@@ -309,9 +332,12 @@ camel_rules = MappingRule(
              "reference": Text("ref "),
              "for loop": Key("c-c, f"),
              "while loop": Key("c-c, w"),
-             "try": Key("c-c, i"),
+             "try": Key("c-c, t"),
              "block": Key("c-c, b"),
+             "print eff": Text("Printf.printf \"\"")+Key("left"),
              "dunk": Text(";;")+Key("enter"),
+             "second": Text("snd"),
+             "first": Text("fst"),
              "type <text>":            Text("type ")+Function(camel_case_text)+Text(" = "),
              "lambda":            Text("fun  -> ")+Key("left, left, left, left"),
              "match":            Text("match  with")+Key("left, left, left, left, left"),
@@ -325,15 +351,23 @@ camel_rules = MappingRule(
              "not":            Text("not "),
              "send to": Text(" |> "),
              "apply to": Text(" @@ "),
+             "append": Text(" @ "),
+             "concatenate": Text(" ^ "),
              "comment":        Text("(*  *)")+Key("left, left, left"),
+             "cons": Text(" :: "),
              "int": Text("int"),
              "hash table": Text("Hashtbl."),
              "bool": Text("bool"),
              "prime": Text("'"),
+             "sign": Text("sin"),
+             "cosine": Text("cos"),
+             "exponential": Text("exp"),
              # Merlin commands
              "inference": Key("c-c")+Key("c-t"),
              "erroneous":  Key("c-c")+Key("c-x"),
              "merlin": Key("c-c, tab"),
+             # special jetty commands
+             "arrow": Text(" @> "),
             },
     extras=[           # Special elements in the specs of the mapping
             Dictation("text",format=False),
@@ -438,7 +472,7 @@ alpha_rule = MappingRule(
 "ish": Key('i'), "cap ish": Key('s-i'),
 "jo": Key('j'), "cap jo": Key('s-j'),
 "keel": Key('k'), "cap keel": Key('s-k'),
-"lee": Key('l'), "cap lee": Key('s-l'),
+"lima": Key('l'), "cap lima": Key('s-l'),
 "mike": Key('m'), "cap mike": Key('s-m'),
 "noy": Key('n'), "cap noy": Key('s-n'),
 "osh": Key('o'), "cap osh": Key('s-o'),
@@ -494,5 +528,6 @@ def unload():
     if alpha_grammar:
         alpha_grammar.unload()
     alpha_grammar = None
+
 
 
