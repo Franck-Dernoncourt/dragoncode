@@ -1,6 +1,4 @@
-from dragonfly import (Grammar, AppContext, MappingRule, Dictation,
-                       Key, Text, Function, Integer, IntegerRef,
-                       Literal, Repeat)
+from dragonfly import *
 
 def capitalizeFirst(w):
     return w[0].upper()+w[1:]
@@ -123,11 +121,12 @@ grammar_context = AppContext(executable="emacs") | AppContext(executable="VMware
 
 grammar = Grammar("emacs", context=grammar_context)
 haskell_grammar = Grammar("haskell", context=grammar_context)
+luau_grammar = Grammar("luau", context=grammar_context)
 camel_grammar = Grammar("camel", context=grammar_context)
 latex_grammar = Grammar("latex", context=grammar_context)
 exec_grammar = Grammar("exec", context=grammar_context)
 
-gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar, camel_grammar]
+gunits = [grammar, exec_grammar, haskell_grammar, luau_grammar, latex_grammar, camel_grammar]
 
 #---------------------------------------------------------------------------
 # Create a mapping rule which maps things you can say to actions.
@@ -144,136 +143,148 @@ gunits = [grammar, exec_grammar, haskell_grammar, latex_grammar, camel_grammar]
 example_rule = MappingRule(
     name="example",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
-        "Emacs": Text("emacs "),
+        "of course": Text("yes")+Key("enter"),
+        "no way": Text("no")+Key("enter"),
+        "Emacs": Text("emacs -nw "),
         "butterfly": Key("a-x"),
+        "Gmail": Key("a-x")+Text("gnus")+Key("enter"),
         "stop job": Key("c-z"),
+        "putty full-screen": Key("a-enter"),
         "foreground <n>": Text("fg ")+Text("%(n)d")+Key("enter"),
-             "save":            Key("c-x, c-s"),
-	     "open":            Key("c-x, c-f"),
-             "apostate": Key("c-x/10, c-c/10"),
+        "save":            Key("c-x, c-s"),
+        "open":            Key("c-x, c-f"),
+        "apostate": Key("c-x/10, c-c/10"),
+        "lua": Text("lua"),
         "spin": Key("enter")+Key("tab"),
-             "mac start":            Key("c-x, lparen"),
-	     "mac end":            Key("c-x, rparen"),
-	     "mac do":            Key("c-x, e"),
-             "sun":             Key("c-s"),
-             "run":             Key("c-r"),
-             "rancor":          Key("as-5"),
-             "amp": Key("ampersand"),
-             "wink": Text(";"),
-             "mango <n>":           Key("a-g, g")+Text("%(n)d")+Key("enter"),
-	     "circle":             Key("lparen, rparen, left"),
-	     "box":             Key("lbracket, rbracket, left"),
-	     "diamond":             Key("langle, rangle, left"),
-	     "curl":             Key("lbrace, rbrace, left"),
-             "string": Text("\"\"") + Key("left"),
-             "rabbit": Text("''") + Key("left"),
-	     "hop":             Key("c-x, o"),
-	     "bash":		Key("a-x, s, h, e, l, l, enter"),
+        "mac start":            Key("c-x, lparen"),
+        "mac end":            Key("c-x, rparen"),
+        "mac do":            Key("c-x, e"),
+        "sun":             Key("c-s"),
+        "run":             Key("c-r"),
+        "rancor":          Key("as-5"),
+        "amp": Key("ampersand"),
+        "wink": Text(";"),
+        "mango <n>":           Key("a-g, g")+Text("%(n)d")+Key("enter"),
+        "circle":             Key("lparen, rparen, left"),
+        "box":             Key("lbracket, rbracket, left"),
+        "diamond":             Key("langle, rangle, left"),
+        "curl":             Key("lbrace, rbrace, left"),
+        "string": Text("\"\"") + Key("left"),
+        "rabbit": Text("''") + Key("left"),
+        "hop":             Key("c-x, o"),
+    "bash":Key("a-x, s, h, e, l, l, enter"),
         "no hup": Text("nohup  &")+Key("left,left"),
         "feline [<n>]": Key("c-x, right")*Repeat(extra = "n"),
         "canine [<n>]": Key("c-x, left")*Repeat(extra = "n"),
-	     "quit":		Key("c-g"),
-	     "veal":		Key("c-x, 3"),
-	     "holly":		Key("c-x, 2"),
-	     "breathe":		Key("c-x, 1"),
-             "underscore": Text("_"),
-	     "buff":		Key("c-x, c-b"),
-             "leap [<n>]":            Key("ca-f")*Repeat(extra="n"),
-             "trip [<n>]":         Key("ca-b")*Repeat(extra="n"),
-             "paste":         Key("c-y"),
-             "scratch":         Key("c-x, u"),
-             "scratch that":         Key("c-x, u"),
-             "mark":         Key("c-space"),
-             "chop":         Key("c-w"),
-             "zap":         Key("a-w"),
-             "wipe":         Key("c-k"),
-             "kill":         Key("c-x, k"),
-             "say <text>": Text("%(text)s"),
-             "camel <text>": Function(camel_case_text),
-             "studley <text>": Function(big_camel_case_text),
-             "score <text>": Function(rich_case_text),
+    "quit":Key("c-g"),
+    "veal":Key("c-x, 3"),
+    "holly":Key("c-x, 2"),
+    "breathe":Key("c-x, 1"),
+        "underscore": Text("_"),
+    "buff":Key("c-x, c-b"),
+        "leap [<n>]":            Key("ca-f")*Repeat(extra="n"),
+        "trip [<n>]":         Key("ca-b")*Repeat(extra="n"),
+        "paste":         Key("c-y"),
+        "scratch":         Key("c-x, u"),
+        "scratch that":         Key("c-x, u"),
+        "mark":         Key("c-space"),
+        "chop":         Key("c-w"),
+        "zap":         Key("a-w"),
+        "wipe":         Key("c-k"),
+        "kill":         Key("c-x, k, enter"),
+        "say <text>": Text("%(text)s"),
+        "camel <text>": Function(camel_case_text),
+        "studley <text>": Function(big_camel_case_text),
+        "score <text>": Function(rich_case_text),
         "humble <text>": Function(big_rich_case_text),
-             "dote <text>": Function(dot_case_text),
-             "moth <text>": Function(big_dot_case_text),
-             "tab":          Key("tab"),
-             "dab":          Key("tab, tab"),
-             "quote":        Key("dquote"),
-             "slap [<n>]":        Key("enter") * Repeat(extra="n"),
-             "spark":        Key("squote"),
-             "inject":        Key("backtick"),
-             "comma":        Key("comma"),
-             "colon":        Key("colon"),
-             "reach":        Key("c-e"),
-             "fall":          Key("c-a"),
-             "eat oh eff": Key("c-d"),
-"sword [<n>]": Key('c-d')*Repeat(extra = "n"),
-"pike [<n>]": Key('backspace')*Repeat(extra = "n"),
-             "pounce [<n>]":        Key("a-p") * Repeat(extra="n"),
-             "up [<n>]":        Key("up") * Repeat(extra="n"),
-             "down [<n>]":          Key("down") * Repeat(extra="n"),
-             "left [<n>]":        Key("left") * Repeat(extra="n"),
-             "right [<n>]":          Key("right") * Repeat(extra="n"),
-             "choose <n> [<c>]": Key("c-x, b/10, asterisk/10")+Key("s-c")+Text("ompletions*")+Key("enter")+
-                                 Key("a-g, g")+Text("%(n)d")+Key("enter")+(Key("ca-f")*Repeat(extra = "c"))+Key("enter")+
-                                 Key("a-x/10")+Text("kill-buffer-and-its-windows")+Key("enter/10")+
-                                 Key("asterisk/10")+Key("s-c")+Text("ompletions*")+Key("enter"),
-             "club [<n>]":          Key("a-backspace")*Repeat(extra = "n"),
-             "chirp":          Key("c-l"),
-             "zoom":          Key("as-dot"),
-             "zip":          Key("as-comma"),
-             "scream <text>":          Function(yell_text),
-             "jive <text>":          Function(lisp_text),
-             "dot":          Key("dot"),
-             "slash":          Key("slash"),
-             "splat":          Key("asterisk"),
-             "slash":          Key("slash"),
-             "divide":          Key("space") + Key("slash") + Key("space"),
-             "backslash":          Key("backslash"),
-             "pound":          Key("hash"),
-             "tilde": Key("tilde"),
-             "plus":           Key("plus"),
-             "minus":          Key("minus"),
-             "pipe":           Key("bar"),
+        "dote <text>": Function(dot_case_text),
+        "moth <text>": Function(big_dot_case_text),
+        "tab":          Key("tab"),
+        "slurp [<n>]": Key("c-space")+Key("ca-f")*Repeat(extra = "n")+Key("a-w"),
+        "snap [<n>]": Key("c-space")+Key("ca-b")*Repeat(extra = "n")+Key("a-w"),
+        "snake":          Key("tab"),
+        "snake eyes":          Key("tab, tab"),
+        "quote":        Key("dquote"),
+        "slap [<n>]":        Key("enter") * Repeat(extra="n"),
+        "spark":        Key("squote"),
+        "inject":        Key("backtick"),
+        "comma":        Key("comma"),
+        "colon":        Key("colon"),
+        "reach":        Key("c-e"),
+        "fall":          Key("c-a"),
+        "eat oh eff": Key("c-d"),
+        "sword [<n>]": Key('c-d')*Repeat(extra = "n"),
+        "pike [<n>]": Key('backspace')*Repeat(extra = "n"),
+        "pounce [<n>]":        Key("a-p") * Repeat(extra="n"),
+        "up [<n>]":        Key("up") * Repeat(extra="n"),
+        "down [<n>]":          Key("down") * Repeat(extra="n"),
+        "left [<n>]":        Key("left") * Repeat(extra="n"),
+        "right [<n>]":          Key("right") * Repeat(extra="n"),
+        "choose <n> [<c>]": Key("c-x, b/10, asterisk/10")+Key("s-c")+Text("ompletions*")+Key("enter")+
+        Key("a-g, g")+Text("%(n)d")+Key("enter")+(Key("ca-f")*Repeat(extra = "c"))+Key("enter")+
+        Key("a-x/10")+Text("kill-buffer-and-its-windows")+Key("enter/10")+
+        Key("asterisk/10")+Key("s-c")+Text("ompletions*")+Key("enter"),
+        "club [<n>]":          Key("a-backspace")*Repeat(extra = "n"),
+        "chirp":          Key("c-l"),
+        "zoom":          Key("as-dot"),
+        "zip":          Key("as-comma"),
+        "scream <text>":          Function(yell_text),
+        "jive <text>":          Function(lisp_text),
+        "dot":          Key("dot"),
+        "slash":          Key("slash"),
+        "splat":          Key("asterisk"),
+        "slash":          Key("slash"),
+        "divide":          Key("space") + Key("slash") + Key("space"),
+        "backslash":          Key("backslash"),
+        "pound":          Key("hash"),
+        "tilde": Key("tilde"),
+        "plus":           Key("plus"),
+        "minus":          Key("minus"),
+        "pipe":           Key("bar"),
         "bang": Text("!"),
-             "equals":          Key("space") + Key("equal") + Key("space"),
-             "congo":          Key("space") + Key("equal") + Key("equal") + Key("space"),
-             "major":          Key("space") + Key("s-dot") + Key("space"),
-             "minor":           Key("space") + Key("s-comma") + Key("space"),
-             # Shell commands
-             "odin":          Text("sudo -i")+Key("enter"),
-             "summon":          Text("apt-get install "),
-             "vanquish":          Text("apt-get remove "),
-             "inquisition": Text("apt-cache search "),
-             "popcorn":          Text("cd ..")+Key("enter"),
-             "explore":          Text("cd "),
-             "survey":          Text("ls -lah | less")+Key("enter"),
-             "scout":           Text("ls")+Key("enter"),
-             "doctor":           Text("dmesg|less")+Key("enter"),
+        "equals":          Key("space") + Key("equal") + Key("space"),
+        "congo":          Key("space") + Key("equal") + Key("equal") + Key("space"),
+        "major":          Key("space") + Key("s-dot") + Key("space"),
+        "minor":           Key("space") + Key("s-comma") + Key("space"),
+        # Shell commands
+        "odin":          Text("sudo -i")+Key("enter"),
+        "summon":          Text("apt-get install "),
+        "vanquish":          Text("apt-get remove "),
+        "inquisition": Text("apt-cache search "),
+        "grape": Text("grep "),
+        "wreck grape": Text("rgrep "),
+        "grape soda": Text("grep -i "),
+        "wreck grape soda": Text("rgrep -i "),
+        "popcorn":          Text("cd ..")+Key("enter"),
+        "explore":          Text("cd "),
+        "survey":          Text("ls -lah | less")+Key("enter"),
+        "scout":           Text("ls")+Key("enter"),
+        #             "doctor":           Text("dmesg|less")+Key("enter"),
         "airhead <n>": Key("c-x, backtick")*Repeat(extra = "n"),
-             "make <text>":           Key("a-colon")+Text("(compile \"make %(text)s\")")+Key("enter"),
-             "new folder": Text("mkdir "),
-             "exit": Text("exit")+Key("enter"),
-             # window manager support
-             "lemon":           Key("w-tab"),
-             "pineapple":           Key("w-x"),
-             "lime":           Key("w-space"),
-             "coconut":           Key("w-enter"),
-             "vacation <n>":          Key("sw-%(n)d"),
-             "visit <n>":          Key("w-%(n)d"),
-             # version control
-             "get commit":           Text("git commit -a -m \"\"")+Key("left"),
-             "get push":           Text("git push")+Key("enter"),
-             "get pull":           Text("git pull")+Key("enter"),
-             "get add":           Text("git add "),
-             "get branch": Text("git branch "),
-             "get checkout": Text("git checkout "),
-             "get log": Text("git log "),
-             "get clone": Text("git clone "),
+        "make <text>":           Key("a-colon")+Text("(compile \"make %(text)s\")")+Key("enter"),
+        "new folder": Text("mkdir "),
+        "exit": Text("exit")+Key("enter"),
+        # window manager support for xmonad, which I no longer use
+        #             "lemon":           Key("w-tab"),
+        #             "pineapple":           Key("w-x"),
+        #             "lime":           Key("w-space"),
+        #             "coconut":           Key("w-enter"),
+        #             "vacation <n>":          Key("sw-%(n)d"),
+        #             "visit <n>":          Key("w-%(n)d"),
+        # version control
+        "get commit":           Text("git commit -a -m \"\"")+Key("left"),
+        "get push":           Text("git push")+Key("enter"),
+        "get pull":           Text("git pull")+Key("enter"),
+        "get add":           Text("git add "),
+        "get branch": Text("git branch "),
+        "get checkout": Text("git checkout "),
+        "get log": Text("git log "),
+        "get clone": Text("git clone "),
         # file extensions
-"dot em ell": Text(".ml"),
-"dot h s": Text(".hs"),
-"oh camel": Text("ocaml"),
-            },
+        "dot em ell": Text(".ml"),
+        "dot h s": Text(".hs"),
+        "oh camel": Text("ocaml"),
+    },
     extras=[           # Special elements in the specs of the mapping
             Dictation("text",format=False),
             IntegerRef("n", 1, 2000),            IntegerRef("c", 1, 2000),
@@ -338,6 +349,7 @@ camel_rules = MappingRule(
              "dunk": Text(";;")+Key("enter"),
              "second": Text("snd"),
              "first": Text("fst"),
+        "composition": Key("space, percent, space"),
              "type <text>":            Text("type ")+Function(camel_case_text)+Text(" = "),
              "lambda":            Text("fun  -> ")+Key("left, left, left, left"),
              "match":            Text("match  with")+Key("left, left, left, left, left"),
@@ -375,6 +387,34 @@ camel_rules = MappingRule(
            ],
     )
 
+luau_rules = MappingRule(
+    name="luau",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+        "torch": Text("torch"),
+             "lexical":            Text("local  = ")+Key("left, left, left, left"),
+        "nil": Text("nil"),
+        "block": Text("do  end")+Key("left,left,left,left"),
+             "for loop": Text("for  = , ")+Key("left,left,left,left,left"),
+             "while loop": Text("while  do  end")+Key("left,left,left,left,left,left,left,left,left,left"),
+             "lambda":            Text("function ()  end")+Key("left, left, left, left"),
+             "not equal":            Text(" ~= "),
+        "Congo": Text(" == "),
+        "return": Text("return "),
+             "and":             Text(" and "),
+             "or":             Text(" or "),
+        "true": Text("true"),
+        "false": Text("false"),
+             "not":            Text("not "),
+             "length": Text(" #"),
+             "concatenate": Text(" .. "),
+             "comment":        Text("-- "),
+            },
+    extras=[           # Special elements in the specs of the mapping
+            Dictation("text",format=False),
+            IntegerRef("n", 1, 2000)
+           ],
+    )
+
 latex_rules = MappingRule(
     name="latex",    # The name of the rule.
     mapping={          # The mapping dict: spec -> action.
@@ -390,6 +430,8 @@ latex_rules = MappingRule(
 "subsection": Text("\\subsection{}")+Key("left"),
 "equation": Text("\\begin{equation}\n\\end{equation}")+Key("up, c-e")+Key("enter"),
 "equation array": Text("\\begin{eqnarray}\n\\end{eqnarray}")+Key("up, c-e")+Key("enter"),
+        "sinusoid": Text("\\sin "),
+        "cosine": Text("\\cos "),
 "math": Text("$$")+Key("left"),
 "label": Text("\\label{}")+Key("left"),
 "refer": Text("\\ref{}")+Key("left"),
@@ -449,65 +491,117 @@ executive_rules= MappingRule(
 grammar.add_rule(example_rule)
 haskell_grammar.add_rule(haskell_rules)
 camel_grammar.add_rule(camel_rules)
+luau_grammar.add_rule(luau_rules)
 latex_grammar.add_rule(latex_rules)
 exec_grammar.add_rule(executive_rules)
 
 # code for spelling out individual letters
+
+letters = {
+    "aff": 'a',
+    "brav": 'b',
+    "cai": 'c',
+    "doy": 'd',
+    "delt": 'd',
+    "delta": 'd',
+    "eck": 'e',
+    "echo": 'e',
+    "fay": 'f',
+    "goff": 'g',
+    "hoop": 'h',
+    "ish": 'i',
+    "jo": 'j',
+    "keel": 'k',
+    "lima": 'l',
+    "mike": 'm',
+    "noy": 'n',
+    "osh": 'o',
+    "pom": 'p',
+    "queen": 'q',
+    "ree": 'r',
+    "soi": 's',
+    "tay": 't',
+    "uni": 'u',
+    "van": 'v',
+    "wes": 'w',
+    "xanth": 'x',
+    "yaa": 'y',
+    "zul": 'z'
+}
+
+letter_rules = {}
+for k in letters:
+    l = letters[k]
+    letter_rules[k] = Key(l)
+    letter_rules["cap "+k] = Key('s-'+l)
+    letter_rules["opt "+k] = Text(" -")+Key(l)+Text(" ")
+    letter_rules["opt cap "+k] = Text(" -")+Key('s-'+l)+Text(" ")
+    letter_rules["per "+k] = Key("percent")+Key(l)
+    letter_rules["per cap "+k] = Key("percent")+Key('s-'+l)
+    letter_rules["est "+k] = Key("backslash")+Key(l)
+    letter_rules["est cap "+k] = Key("backslash")+Key('s-'+l)
+
+
 alpha_grammar = Grammar("alpha")
 alpha_rule = MappingRule(
     name="alpha",    # The name of the rule.
-    mapping={          # The mapping dict: spec -> action.
-#        "cap": Key('capslock'),
-"aff": Key('a'), "cap aff": Key('s-a'),
-"brav": Key('b'), "cap brav": Key('s-b'),
-"cai": Key('c'), "cap cai": Key('s-c'),
-"doy": Key('d'), "cap doy": Key('s-d'),
-"delt": Key('d'), "cap delt": Key('s-d'),
-"delta": Key('d'), "cap delta": Key('s-d'),
-"eck": Key('e'), "cap eck": Key('s-e'),
-"echo": Key('e'), "cap echo": Key('s-e'),
-"fay": Key('f'), "cap fay": Key('s-f'),
-"goff": Key('g'), "cap goff": Key('s-g'),
-"hoop": Key('h'), "cap hoop": Key('s-h'),
-"ish": Key('i'), "cap ish": Key('s-i'),
-"jo": Key('j'), "cap jo": Key('s-j'),
-"keel": Key('k'), "cap keel": Key('s-k'),
-"lima": Key('l'), "cap lima": Key('s-l'),
-"mike": Key('m'), "cap mike": Key('s-m'),
-"noy": Key('n'), "cap noy": Key('s-n'),
-"osh": Key('o'), "cap osh": Key('s-o'),
-"pom": Key('p'), "cap pom": Key('s-p'),
-"queen": Key('q'), "cap queen": Key('s-q'),
-"ree": Key('r'), "cap ree": Key('s-r'),
-"soi": Key('s'), "cap soi": Key('s-s'),
-"tay": Key('t'), "cap tay": Key('s-t'),
-"uni": Key('u'), "cap uni": Key('s-u'),
-"van": Key('v'), "cap van": Key('s-v'),
-"wes": Key('w'), "cap wes": Key('s-w'),
-"xanth": Key('x'), "cap xanth": Key('s-x'),
-"yaa": Key('y'), "cap yaa": Key('s-y'),
-"zul": Key('z'), "cap zul": Key('s-z'),
-"lace": Text("{"),
-"race": Text("}"),
-"lark": Text("("),
-"fark": Text(")"),
-"lack": Text("["),
-"rack": Text("]"),
-"ace": Text(" "),
-"one": Text("1"),
-"two": Text("2"),
-"three": Text("3"),
-"four": Text("4"),
-"five": Text("5"),
-"six": Text("6"),
-"seven": Text("7"),
-"eight": Text("8"),
-"nine": Text("9"),
-"zero": Text("0")
-})
+    mapping=dict(list(letter_rules.items()) + list({
+        "lace": Text("{"),
+        "race": Text("}"),
+        "lark": Text("("),
+        "fark": Text(")"),
+        "lack": Text("["),
+        "rack": Text("]"),
+        "ace": Text(" "),
+        "one": Text("1"),
+        "two": Text("2"),
+        "three": Text("3"),
+        "four": Text("4"),
+        "five": Text("5"),
+        "six": Text("6"),
+        "seven": Text("7"),
+        "eight": Text("8"),
+        "nine": Text("9"),
+        "zero": Text("0")
+    }.items())))
 
-alpha_grammar.add_rule(alpha_rule)
+alternatives = []
+alternatives.append(RuleRef(rule=alpha_rule))
+single_action = Alternative(alternatives)
+sequence = Repetition(single_action, min=1, max=16, name="sequence")
+
+class RepeatRule(CompoundRule):
+    spec     = "<sequence>"
+    extras   = [
+                sequence
+               ]
+    def _process_recognition(self, node, extras):
+        sequence = extras["sequence"]   # A sequence of actions.
+        for action in sequence:
+            action.execute()
+
+alpha_grammar.add_rule(RepeatRule())
 alpha_grammar.load()
+
+
+password_grammar = Grammar("password")
+password_dictionary = {}
+for line in open("C:/natlink/natlink/macrosystem/passwords", "r"):
+    parts = line.split("|")
+    password_dictionary[parts[0]] = Text(parts[1])
+    
+password_rule = MappingRule(
+    name="passwords",    # The name of the rule.
+    mapping=password_dictionary)
+
+password_grammar.add_rule(password_rule)
+password_grammar.load()
+
+window_grammar = Grammar("window_grammar")
+window_rule = MappingRule(name = "window_rule",mapping = {
+        "switch window": Key("a-tab")})
+window_grammar.add_rule(window_rule)
+window_grammar.load()
 
 #---------------------------------------------------------------------------
 # Load the grammar instance and define how to unload it.
@@ -528,6 +622,11 @@ def unload():
     if alpha_grammar:
         alpha_grammar.unload()
     alpha_grammar = None
-
-
-
+    global password_grammar
+    if password_grammar:
+        password_grammar.unload()
+    password_grammar = None
+    global window_grammar
+    if window_grammar:
+        window_grammar.unload()
+    window_grammar = None
