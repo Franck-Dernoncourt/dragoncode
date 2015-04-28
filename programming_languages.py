@@ -1,0 +1,302 @@
+from dragonfly import *
+from verbatim import *
+
+composite_options = []
+
+class Mapping:
+    def __init__(self, name=None, mapping=None, fundamental = False):
+        global composite_options
+        composite_options.append(self)
+        self.name = name
+        self.mapping = mapping
+        self.fundamental = fundamental
+        self.enabled = fundamental
+    
+
+python_mapping = Mapping(
+    name="python",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+        "comprehend": Text("for  in ") + Key("left")*4,
+        "for loop": Text("for  in :") + Key("left")*5,
+        "while loop": Text("while :") + Key("left"),
+        "conditional":             Text("if :") + Key("left"),
+        "defun": Text("def ():") + Key("left")*3,
+        "return": Text("return "),
+        "truth E ness": Text("True"),
+        "falsity": Text("False"),
+        "length": Text("len()") + Key("left"),
+        "else if":             Text("elif :") + Key("left"),
+    })
+
+shell_mapping = Mapping(
+    name = "shell",
+    mapping = {
+        "foreground <n>": Text("fg ")+Text("%(n)d")+Key("enter"),
+        "stop job": Key("c-z"),
+        "no hup": Text("nohup  &")+Key("left,left"),
+        "kit cat": Text("cat "),
+        "odin":          Text("sudo -i")+Key("enter"),
+        "untar gizz": Text("tar xzvf "),
+        "tar gizz": Text("tar czvf "),
+        "apt get install":          Text("apt-get install "),
+        "apt get remove":          Text("apt-get remove "),
+        "apt cache search": Text("apt-cache search "),
+        "pythonic": Text("python "),
+        "grape": Text("grep "),
+        "are grape": Text("rgrep "),
+        "grape eye": Text("grep -i "),
+        "are grape eye": Text("rgrep -i "),
+        "popcorn":          Text("cd ..")+Key("enter"),
+        "explore":          Text("cd "),
+        "survey":          Text("ls -lah | less")+Key("enter"),
+        "scout":           Text("ls")+Key("enter"),
+        "new folder": Text("mkdir "),
+        "exit": Text("exit")+Key("enter"),
+        "Emacs": Text("emacs -nw "),
+        # version control
+        "get commit":           Text("git commit -a -m \"\"")+Key("left"),
+        "get push":           Text("git push")+Key("enter"),
+        "get pull":           Text("git pull")+Key("enter"),
+        "get add":           Text("git add "),
+        "get branch": Text("git branch "),
+        "get checkout": Text("git checkout "),
+        "get log": Text("git log "),
+        "get diff": Text("git diff "),
+        "get clone": Text("git clone "),
+        "oh camel": Text("ocaml")
+    })
+
+emacs_mapping = Mapping(
+    name = "editor",
+    mapping = {
+        "airhead <n>": Key("c-x, backtick")*Repeat(extra = "n"),
+        "of course": Text("yes")+Key("enter"),
+        "no way": Text("no")+Key("enter"),
+        "butterfly": Key("a-x"),
+        "Gmail": Key("a-x")+Text("gnus")+Key("enter"),
+        "save":            Key("c-x, c-s"),
+        "open":            Key("c-x, c-f"),
+        "compile latex": Key("c-c, c-c, enter"),
+        "apostate": Key("c-x/10, c-c/10"),
+        "mac start":            Key("c-x, lparen"),
+        "mac end":            Key("c-x, rparen"),
+        "mac do":            Key("c-x, e"),
+        "meta per":          Key("as-5"),
+        "sun":             Key("c-s"),
+        "run":             Key("c-r"),
+        "hop":             Key("c-x, o"),
+        "bash":		Key("a-x, s, h, e, l, l, enter"),
+        "quit":		Key("c-g"),
+        "split veal":		Key("c-x, 3"),
+        "split holly":		Key("c-x, 2"),
+        "breathe":		Key("c-x, 1"),
+        "quit":		Key("c-g"),
+        "split veal":		Key("c-x, 3"),
+        "split holly":		Key("c-x, 2"),
+        "breathe":		Key("c-x, 1"),
+        "buff":		Key("c-x, c-b, c-x, o"),
+        "paste":         Key("c-y"),
+        "scratch":         Key("c-x, u"),
+        "scratch that":         Key("c-x, u"),
+        "mara":         Key("c-space"),
+        "chop":         Key("c-w"),
+        "zap":         Key("a-w"),
+        "wipe":         Key("c-k"),
+        "kill":         Key("c-x, k, enter"),
+        "reach":        Key("c-e"),
+        "fall":          Key("c-a"),
+        "chirp top":          Key("c-l")*2,
+        "chirp bot":          Key("c-l")*3,
+        "chirp":          Key("c-l"),
+        "zoom":          Key("as-dot"),
+        "mango": Key("a-g,g"),
+        # used for selecting a buffer
+        "Apple <n>": Key("a-g,g") + Text("%(n)i") + Key("enter")*2,
+        "zip":          Key("as-comma"),
+        # these used to have numbers as arguments
+        "club":          Key("a-backspace"),
+        "leap":            Key("ca-f"),
+        "trip":         Key("ca-b"),
+        "slurp": Key("c-space")+Key("ca-f"),
+        "snap": Key("c-space")+Key("ca-b"),
+        "slap":        Key("enter"),
+        "sword": Key('c-d'),
+        "barb": Key('backspace'),
+        "pounce":        Key("a-p"),
+        # here are the same versions with a suffix indicating that they take a number
+        "clubber <n>":          Key("a-backspace") * Repeat(extra="n"),
+        "upper <n>":        Key("up") * Repeat(extra="n"),
+        "downer <n>":          Key("down") * Repeat(extra="n"),
+        "lefter <n>":        Key("left") * Repeat(extra="n"),
+        "righter <n>":          Key("right") * Repeat(extra="n"),
+        "leaper <n>":            Key("ca-f") * Repeat(extra = "n"),
+        "tripper <n>":         Key("ca-b") * Repeat(extra = "n"),
+        "slurper <n>": Key("c-space")+Key("ca-f") * Repeat(extra = "n"),
+        "snapper <n>": Key("c-space")+Key("ca-b") * Repeat(extra = "n"),
+        "rower <n>":        Key("enter") * Repeat(extra = "n"),
+        "sworder <n>": Key('c-d') * Repeat(extra = "n"),
+        "barber <n>": Key('backspace') * Repeat(extra = "n"),
+        "pouncer <n>":        Key("a-p") * Repeat(extra = "n"),
+    })
+
+haskell_mapping = Mapping(
+    name="haskell",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+        "dagger": Text("DAG"),
+        "data":            Text("data ")+Text(" = ")+Key("left")*4,
+             "lexical":            Text("let x = x")+Key("enter, i, n, space, tab, up, c-e, backspace, left, left, left, backspace"),
+             "type":            Text("type ")+Text(" = ")+Key("left")*4,
+             "lambda":            Key("backslash, space, space, minus,  s-dot, space, left, left, left, left"),
+             "case":            Text("case  of")+Key("left, left, left"),
+             "do":            Text("do "),
+             "where":            Text("where  = ")+Key("left, left, left"),
+             "assign":            Text(" <- "),
+             "infix": Text("``")+Key("left"),
+             "goes to":            Text(" -> "),
+             "has type":            Text(" :: "),
+             "not equal":            Text(" /= "),
+             "and":             Text(" && "),
+             "or":             Text(" || "),
+             "not":            Text("not "),
+             "compose":            Text(" . "),
+             "comment":        Text(" -- "),
+             "magic": Key("ca-i"),
+             "local": Key("a-slash"),
+             "temp": Key("a-t"),
+             "dollar": Text(" $ "),
+             "branch":            Text("if x")+Key("enter")+Text("then x")+Key("enter")+Text("else x")+Key("tab, up, tab, up, c-e, backspace, down, c-e, backspace, down, c-e, backspace, up, up"),
+             "return": Text("return "),
+             "import": Text("import "),
+             "qualified": Text("import qualified  as ") + Key("enter, up, c-e, left, left, left, left"),
+             "module": Text("module  where") + Key("enter, enter, up, up, c-e, left, left, left, left, left, left"),
+             "bind": Text(">>="),
+             "double": Text("Double"),
+             "int": Text("Int"),
+             "evaluate": Key("c-c, c-l"),
+             "prime": Text("'"),
+            })
+camel_mapping = Mapping(
+    name="camel",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+             "lexical":            Text("let  =  in")+Key("left, left, left, left, left, left"),
+             "recursive": Text("let rec "),
+             "reference": Text("ref "),
+             "for loop": Key("c-c, f"),
+             "while loop": Key("c-c, w"),
+             "try": Key("c-c, t"),
+             "block": Key("c-c, b"),
+             "print eff": Text("Printf.printf \"\"")+Key("left"),
+             "dunk": Text(";;")+Key("enter"),
+             "second": Text("snd"),
+             "first": Text("fst"),
+        "composition": Key("space, percent, space"),
+             "type":            Text("type = ") + Key("left")*4,
+             "lambda":            Text("fun  -> ")+Key("left, left, left, left"),
+             "match":            Text("match  with")+Key("left, left, left, left, left"),
+             "assign":            Text(" := "),
+             "goes to":            Text(" -> "),
+             "went to":            Text(" <- "),
+             "has type":            Text(" : "),
+             "not equal":            Text(" <> "),
+             "and":             Text(" && "),
+             "or":             Text(" || "),
+             "not":            Text("not "),
+             "send to": Text(" |> "),
+             "apply to": Text(" @@ "),
+             "append": Text(" @ "),
+             "concatenate": Text(" ^ "),
+             "comment":        Text("(*  *)")+Key("left, left, left"),
+             "cons": Text(" :: "),
+             "int": Text("int"),
+             "hash table": Text("Hashtbl."),
+             "bool": Text("bool"),
+             "prime": Text("'"),
+             "sign": Text("sin"),
+             "cosine": Text("cos"),
+             "exponential": Text("exp"),
+             # Merlin commands
+             "inference": Key("c-c")+Key("c-t"),
+             "erroneous":  Key("c-c")+Key("c-x"),
+             "merlin": Key("c-c, tab"),
+             # special jetty commands
+             "arrow": Text(" @> "),
+            })
+
+java_mapping = Mapping(
+    name="java",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+             "integer":            Text("int "),
+        "return": Text("return "),
+             "reference": Text("ref "),
+        "conditional": Text("if () {}") + Key("left")*4,
+             "for loop": Text("for (int  = ; ; ) {}") + Key("left")*11,
+             "while loop": Text("while () {}") + Key("left")*4,
+             "and":             Text(" && "),
+             "or":             Text(" || "),
+             "comment":        Text("/*  */")+Key("left, left, left"),
+            })
+
+luau_mapping = Mapping(
+    name="luau",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+        "torch": Text("torch"),
+             "lexical":            Text("local  = ")+Key("left, left, left, left"),
+        "nil": Text("nil"),
+        "block": Text("do  end")+Key("left,left,left,left"),
+             "for loop": Text("for  = , ")+Key("left,left,left,left,left"),
+             "while loop": Text("while  do  end")+Key("left,left,left,left,left,left,left,left,left,left"),
+             "lambda":            Text("function ()  end")+Key("left, left, left, left"),
+             "not equal":            Text(" ~= "),
+        "Congo": Text(" == "),
+        "return": Text("return "),
+             "and":             Text(" and "),
+             "or":             Text(" or "),
+        "true": Text("true"),
+        "false": Text("false"),
+             "not":            Text("not "),
+             "length": Text(" #"),
+             "concatenate": Text(" .. "),
+             "comment":        Text("-- "),
+            })
+
+latex_mapping = Mapping(
+    name="latex",    # The name of the rule.
+    mapping={          # The mapping dict: spec -> action.
+        "summation": Text("\\sum"),
+        "Beemer frame": Text("\\begin{frame}{}")+Key("enter")+Key("enter")+Text("\\end{frame}")+Key("up")+Key("up")+Key("c-e, left"),
+        "infinity": Text("\\infty"),
+        "supremum": Text("\\sup "),
+        "infinum": Text("\\inf "),
+        "member": Text("\\in "),
+        "for all": Text("\\forall "),
+        "there exists": Text("\\exists"),
+        "power": Text("^{}")+Key("left"),
+        "compile": Key("c-c, c-c"),
+        "subsection": Text("\\subsection{}")+Key("left"),
+        "equation": Text("\\begin{equation}\n\\end{equation}")+Key("up, c-e")+Key("enter"),
+        "equation array": Text("\\begin{eqnarray}\n\\end{eqnarray}")+Key("up, c-e")+Key("enter"),
+        "sinusoid": Text("\\sin "),
+        "cosine": Text("\\cos "),
+        "math": Text("$$")+Key("left"),
+        "label": Text("\\label{}")+Key("left"),
+        "refer": Text("\\ref{}")+Key("left"),
+        "package": Text("\\usepackage{}")+Key("left"),
+        "preamble": Text("\\documentclass{article}\n\n\n\\begin{document}\n\n\n\\end{document}")+Key("up, up"),
+        "degree": Text("\\circ "),
+        "section": Text("\\section{}")+Key("left"),
+        "figure": Text("\\begin{figure}\n\\end{figure}")+Key("up, c-e, enter"),
+        "code box": Text("\\begin{codebox}\n\\end{codebox}")+Key("up, c-e, enter"),
+        "text box": Text("\\text{}")+Key("left"),
+        "square root": Text("\\sqrt{}")+Key("left"),
+        "dack dash": Text("\\\\"),
+        "fraction": Text("\\frac{}{}")+Key("left")+Key("left")+Key("left"),
+        "itemize": Text("\\begin{itemize}\n\n\\end{itemize}")+Key("up"),
+        "if and only if": Text(" iff "),
+        #Greek letters
+        "alpha": Text("\\alpha"),
+        "beta": Text("\\beta"),
+        "theta": Text("\\theta"),
+        "gamma": Text("\\gamma"),
+        "mu": Text("\\mu"),
+        "delta": Text("\\delta"),
+    })
